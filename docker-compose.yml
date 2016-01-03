@@ -1,0 +1,39 @@
+volumes:
+  container_name: weblate-volumes
+  image: tianon/true
+
+server:
+  container_name: weblate
+  build: .
+  environment:
+    VIRTUAL_HOST: weblate.lab.bee.pw
+    VIRTUAL_PORT: 8000
+
+    WEBLATE_DEBUG: 1
+    WEBLATE_ADMIN_NAME: Maik
+    WEBLATE_ADMIN_EMAIL: weblate@beevelop.com
+    WEBLATE_EMAIL: weblate@beevelop.com
+
+    EMAIL_HOST: smtp.gmail.com
+    EMAIL_HOST_USER: Herbert
+    EMAIL_HOST_PASSWORD: Un1c0rn
+  links:
+    - database
+    - cache
+  volumes_from:
+    - volumes
+  restart: always
+
+database:
+  container_name: weblate-db
+  image: postgres:9.4
+  volumes_from:
+    - volumes
+  restart: always
+  environment:
+    POSTGRES_PASSWORD: weblate
+    POSTGRES_USER: weblate
+
+cache:
+  container_name: weblate-cache
+  image: memcached:1.4
