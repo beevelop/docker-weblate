@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -ea # Exit on Error and Export all vars
+
+lockfile=/var/lock/weblate
+if [ ! -e $lockfile ]; then
+   trap "rm -f $lockfile; exit" INT TERM EXIT
+   touch $lockfile
+
+   django-admin migrate --noinput
+   django-admin collectstatic --noinput
+   django-admin createadmin
+
+   # Don't remove the lockfile here to run initial DB setup only once
+   trap - INT TERM EXIT
+fi
+
+django-admin runserver 0.0.0.0:8000
