@@ -26,3 +26,12 @@ docker run -it beevelop/weblate bash
 ```Dockerfile
 FROM beevelop/weblate:latest
 ```
+
+## Configuration
+- `WEBLATE_DEBUG`
+- `WEBLATE_ADMIN_NAME`
+- `WEBLATE_ADMIN_EMAIL`
+- `WEBLATE_EMAIL`
+- `EMAIL_HOST`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
