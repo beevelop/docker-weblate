@@ -2,10 +2,10 @@ FROM beevelop/base
 
 MAINTAINER Maik Hummel <m@ikhummel.com>
 
-COPY requirements.txt /opt
-COPY start /opt
+WORKDIR /opt/
 
-WORKDIR /opt
+COPY requirements.txt .
+COPY start .
 
 RUN apt-get -qq update && \
     apt-get -qq install python-psycopg2 python-lxml python-pillow gcc libxml2-dev python-dev python python-dev python-pip python-virtualenv -y --no-install-recommends && \
