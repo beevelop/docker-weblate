@@ -11,6 +11,7 @@ server:
 
     SECRET_KEY: Un1c0rns_4R3_4w3$0m3
     TIME_ZONE: Europe/Berlin
+    SITE_TITLE: Dockweblate
 
     LANGUAGE_CODE: de-de
 

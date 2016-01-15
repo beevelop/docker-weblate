@@ -42,3 +42,4 @@ FROM beevelop/weblate:latest
     + [Using Language Identifiers (RFC 3066)](http://www.i18nguy.com/unicode/language-identifiers.html)
 - `TIME_ZONE` (default: UTC)
     + [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+- `SITE_TITLE` (default: Weblate)

@@ -461,7 +461,7 @@ MT_GOOGLE_KEY = None
 MT_TMSERVER = None
 
 # Title of site to use
-SITE_TITLE = u'Weblate'
+SITE_TITLE = os.environ.get('SITE_TITLE', 'Weblate')
 
 # URL of login
 LOGIN_URL = '%s/accounts/login/' % URL_PREFIX
