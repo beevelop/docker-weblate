@@ -37,4 +37,8 @@ FROM beevelop/weblate:latest
 - `EMAIL_HOST_PASSWORD`
 - `EMAIL_PORT` (default: 587)
 - `SECRET_KEY` (this is required for a production-ready setup)
-  - **Might be mandatory in future releases!**
+    + **Might be mandatory in future releases!**
+- `LANGUAGE_CODE` (default: en-us)
+    + [Using Language Identifiers (RFC 3066)](http://www.i18nguy.com/unicode/language-identifiers.html)
+- `TIME_ZONE` (default: UTC)
+    + [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
