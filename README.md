@@ -36,3 +36,5 @@ FROM beevelop/weblate:latest
 - `EMAIL_HOST_USER`
 - `EMAIL_HOST_PASSWORD`
 - `EMAIL_PORT` (default: 587)
+- `SECRET_KEY` (this is required for a production-ready setup)
+  - **Might be mandatory in future releases!**
