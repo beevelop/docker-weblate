@@ -35,3 +35,4 @@ FROM beevelop/weblate:latest
 - `EMAIL_HOST`
 - `EMAIL_HOST_USER`
 - `EMAIL_HOST_PASSWORD`
+- `EMAIL_PORT` (default: 587)
