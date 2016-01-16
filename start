@@ -2,17 +2,18 @@
 
 set -ea # Exit on Error and Export all vars
 
-lockfile=/var/lock/weblate
-if [ ! -e $lockfile ]; then
-   trap "rm -f $lockfile; exit" INT TERM EXIT
-   touch $lockfile
+. ./conf.env
 
-   django-admin migrate --noinput
-   django-admin collectstatic --noinput
-   django-admin createadmin
+while ! nc -z $DB_HOST $DB_PORT; do
+  echo "Waiting for Database at $DB_HOST:$DB_PORT..."
+  sleep 2
+done
 
-   # Don't remove the lockfile here to run initial DB setup only once
-   trap - INT TERM EXIT
-fi
+# Allow migration to fail due to already initialized DB
+{
+   django-admin migrate --noinput &&
+   django-admin collectstatic --noinput &&
+   ./createAdminOnce.py
+}
 
 django-admin runserver 0.0.0.0:8000
