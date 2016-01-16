@@ -1,15 +1,17 @@
 volumes:
   container_name: weblate-volumes
   image: tianon/true
+  volumes:
+    - /docker/weblate/config:/app/etc:ro
+    - /docker/weblate/db:/var/lib/postgresql/data
 
 server:
   container_name: weblate
   build: .
   environment:
-    VIRTUAL_HOST: weblate.lab.bee.pw
-    VIRTUAL_PORT: 8000
-
     SECRET_KEY: Un1c0rns_4R3_4w3$0m3
+    ADMIN_PASSWORD: Un1c0rn
+
     TIME_ZONE: Europe/Berlin
     SITE_TITLE: Dockweblate
 
@@ -17,12 +19,13 @@ server:
 
     WEBLATE_DEBUG: 1
     WEBLATE_ADMIN_NAME: Maik
-    WEBLATE_ADMIN_EMAIL: weblate@beevelop.com
-    WEBLATE_EMAIL: weblate@beevelop.com
+    WEBLATE_ADMIN_EMAIL: weblate@example.com
+    WEBLATE_EMAIL: weblate@example.com
 
     EMAIL_HOST: smtp.gmail.com
     EMAIL_HOST_USER: Herbert
     EMAIL_HOST_PASSWORD: Un1c0rn
+    EMAIL_PORT=465
   links:
     - database
     - cache
