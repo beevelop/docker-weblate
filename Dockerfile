@@ -6,12 +6,14 @@ WORKDIR /opt/
 
 COPY requirements.txt ./
 COPY start ./
+COPY conf.env ./
+COPY createAdminOnce.py ./
 
 RUN apt-get -qq update && \
     apt-get -qq install python-psycopg2 python-lxml python-pillow gcc libxml2-dev python-dev python python-dev python-pip python-virtualenv -y --no-install-recommends && \
-    apt-get -qq install curl git mercurial ssh gettext -y && \
+    apt-get -qq install curl git mercurial ssh gettext netcat -y && \
     pip install -r requirements.txt && \
-    chmod +x start
+    chmod +x start createAdminOnce.py
 
 COPY settings.py /usr/local/lib/python2.7/dist-packages/weblate/
 
