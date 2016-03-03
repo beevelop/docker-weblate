@@ -25,7 +25,7 @@ server:
     EMAIL_HOST: smtp.gmail.com
     EMAIL_HOST_USER: Herbert
     EMAIL_HOST_PASSWORD: Un1c0rn
-    EMAIL_PORT=465
+    EMAIL_PORT: 465
   links:
     - database
     - cache
@@ -35,7 +35,7 @@ server:
 
 database:
   container_name: weblate-db
-  image: postgres:9.4
+  image: kiasaki/alpine-postgres
   volumes_from:
     - volumes
   restart: always
