@@ -6,27 +6,30 @@
 
 > Weblate is a translation tool with tight version control integration featuring a simple and clean user interface, propagation of translations across components, quality checks and automatic linking to source files.
 
-# weblate
+# [Weblate](https://weblate.org/) for Docker :whale:
 ----
-### Pull from Docker Hub
-```
-docker pull beevelop/weblate:latest
+
+### Quick start with Docker Compose
+```bash
+git clone https://github.com/beevelop/docker-weblate && cd docker-weblate
+# Adjust the docker-compose.yml to your needs
+docker-compose up
 ```
 
-### Build from GitHub
-```
-docker build -t beevelop/weblate github.com/beevelop/docker-weblate
+### Manually
+```bash
+# Launch a postgres database (POSTGRES_USER and POSTGRES_PASSWORD are mandatory)
+docker run --name dev-weblate-postgres -e POSTGRES_USER=weblate -e POSTGRES_PASSWORD=weblate -d kiasaki/alpine-postgres
+
+# Launch weblate linked to the database
+docker run -it -p 8000:8000 --name dev-weblate \
+    -e DEBUG=True -e WEBLATE_ADMIN_NAME=john \
+    -e WEBLATE_ADMIN_EMAIL=john@example.com \
+    -e WEBLATE_EMAIL=john@example.com \
+    --link dev-weblate-postgres:database beevelop/weblate
 ```
 
-### Run image
-```
-docker run -it beevelop/weblate bash
-```
-
-### Use as base image
-```Dockerfile
-FROM beevelop/weblate:latest
-```
+You should then be able to access Weblate via `http://*YOUR_HOST*:8000`.
 
 ## Configuration
 - `WEBLATE_DEBUG`
