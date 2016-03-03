@@ -6,7 +6,7 @@
 
 > Weblate is a translation tool with tight version control integration featuring a simple and clean user interface, propagation of translations across components, quality checks and automatic linking to source files.
 
-# [Weblate](https://weblate.org/) for Docker :whale:
+# [Weblate](https://weblate.org/) for Docker (unofficial) :whale:
 ----
 
 ### Quick start with Docker Compose
@@ -23,7 +23,7 @@ docker run --name dev-weblate-postgres -e POSTGRES_USER=weblate -e POSTGRES_PASS
 
 # Launch weblate linked to the database
 docker run -it -p 8000:8000 --name dev-weblate \
-    -e DEBUG=True -e WEBLATE_ADMIN_NAME=john \
+    -e WEBLATE_ADMIN_NAME=john \
     -e WEBLATE_ADMIN_EMAIL=john@example.com \
     -e WEBLATE_EMAIL=john@example.com \
     --link dev-weblate-postgres:database beevelop/weblate
