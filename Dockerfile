@@ -4,10 +4,7 @@ MAINTAINER Maik Hummel <m@ikhummel.com>
 
 WORKDIR /opt/
 
-COPY requirements.txt ./
-COPY start ./
-COPY conf.env ./
-COPY createAdminOnce.py ./
+COPY requirements.txt start conf.env createAdminOnce.py ./
 
 RUN apt-get -qq update && \
     apt-get -qq install python-psycopg2 python-lxml python-pillow gcc libxml2-dev python-dev python python-dev python-pip python-virtualenv -y --no-install-recommends && \
@@ -19,6 +16,6 @@ COPY settings.py /usr/local/lib/python2.7/dist-packages/weblate/
 
 EXPOSE 8000
 
-ENV DJANGO_SETTINGS_MODULE weblate.settings
+ENV DJANGO_SETTINGS_MODULE=weblate.settings
 
 CMD ./start
