@@ -594,19 +594,17 @@ if 'CACHE_PORT_11211_TCP_ADDR' in os.environ:
         )
     }
 
-# Example for restricting access to logged in users
-# LOGIN_REQUIRED_URLS = (
-#     r'/(.*)$',
-# )
-
-# In such case you will want to include some of the exceptions
-# LOGIN_REQUIRED_URLS_EXCEPTIONS = (
-#    r'/accounts/(.*)$', # Required for login
-#    r'/media/(.*)$',    # Required for development mode
-#    r'/widgets/(.*)$',  # Allowing public access to widgets
-#    r'/data/(.*)$',     # Allowing public access to data exports
-#    r'/hooks/(.*)$',    # Allowing public access to notification hooks
-# )
+if 'WEBLATE_LOCK_DOWN' in os.environ:
+    LOGIN_REQUIRED_URLS = (
+        r'/(.*)$',
+    )
+    LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+        r'/accounts/(.*)$', # Required for login
+        r'/media/(.*)$',    # Required for development mode
+        r'/widgets/(.*)$',  # Allowing public access to widgets
+        r'/data/(.*)$',     # Allowing public access to data exports
+        r'/hooks/(.*)$',    # Allowing public access to notification hooks
+    )
 
 # Enable whiteboard functionality - under development so disabled by default.
 ENABLE_WHITEBOARD = False
