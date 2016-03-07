@@ -20,4 +20,4 @@ VOLUME ["/app/etc", "/app/data"]
 
 CMD ./start
 
-VOLUME ["/app/etc", "/app/data"]
+EXPOSE 8000
