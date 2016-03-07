@@ -17,7 +17,7 @@ git clone https://github.com/beevelop/docker-weblate && cd docker-weblate
 # Adjust the docker-compose.yml to your needs
 docker-compose up
 ```
-Navigate to `http://*YOURHOST*:8000` and login with `Admin:Un1c0rn`.
+Navigate to `http://*YOURHOST*:8000` and login with `admin:Un1c0rn`.
 
 
 ### Manually
@@ -36,14 +36,16 @@ You should then be able to access Weblate via `http://*YOUR_HOST*:8000`.
 > Attention: To persist changes you need to bind the volumes `/app/data` and `/app/config` for the Weblate container and the respective volumes for the Postgres container.
 
 ## Configuration
-- `WEBLATE_DEBUG`
+### General
+- `WEBLATE_DEBUG` (default: `1`): Enables debugging functionality
+- `WEBLATE_ALLOWED_HOSTS`
+    + Coma-separated list of allowed hosts (e.g. `weblate.beevelop.com`)
+    + Required if `WEBLATE_DEBUG` is disabled!
+- `WEBLATE_LOCK_DOWN` (default: not set)
+    + If set, Weblate requires logging in to access anything (seems quite suitable for private projects) 
 - `WEBLATE_ADMIN_NAME`
 - `WEBLATE_ADMIN_EMAIL`
 - `WEBLATE_EMAIL`
-- `EMAIL_HOST`
-- `EMAIL_HOST_USER`
-- `EMAIL_HOST_PASSWORD`
-- `EMAIL_PORT` (default: 587)
 - `SECRET_KEY` (this is required for a production-ready setup)
     + **Might be mandatory in future releases!**
 - `LANGUAGE_CODE` (default: en-us)
@@ -52,3 +54,9 @@ You should then be able to access Weblate via `http://*YOUR_HOST*:8000`.
     + [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 - `SITE_TITLE` (default: Weblate)
 - `ADMIN_PASSWORD` (default: Un1c0rn)
+
+### Email
+- `EMAIL_HOST`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+- `EMAIL_PORT` (default: `587`)
