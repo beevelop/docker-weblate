@@ -1,7 +1,9 @@
-[![Travis](https://img.shields.io/travis/beevelop/docker-weblate.svg?style=flat-square)](https://travis-ci.org/beevelop/docker-weblate)
-[![Docker Pulls](https://img.shields.io/docker/pulls/beevelop/weblate.svg?style=flat-square)](https://links.beevelop.com/d-weblate)
-[![ImageLayer](https://badge.imagelayers.io/beevelop/weblate:latest.svg)](https://imagelayers.io/?images=beevelop/weblate:latest)
-[![Dependency Status](https://gemnasium.com/beevelop/docker-weblate.svg)](https://gemnasium.com/beevelop/docker-weblate)
+[![Travis](https://shields.beevelop.com/travis/beevelop/docker-weblate.svg?style=flat-square)](https://travis-ci.org/beevelop/docker-weblate)
+[![Docker Pulls](https://shields.beevelop.com/docker/pulls/beevelop/weblate.svg?style=flat-square)](https://links.beevelop.com/d-weblate)
+[![ImageLayers Size](https://shields.beevelop.com/imagelayers/image-size/beevelop/weblate/latest.svg?style=flat-square)](https://imagelayers.io/?images=beevelop/weblate:latest)
+[![ImageLayers Layers](https://shields.beevelop.com/imagelayers/layers/beevelop/weblate/latest.svg?style=flat-square)](https://imagelayers.io/?images=beevelop/weblate:latest)
+[![Gemnasium](https://shields.beevelop.com/gemnasium/beevelop/docker-weblate.svg?style=flat-square)](https://gemnasium.com/beevelop/docker-weblate)
+![Badges](https://shields.beevelop.com/badge/badges-7-brightgreen.svg?style=flat-square)
 [![Beevelop](https://links.beevelop.com/honey-badge)](https://beevelop.com)
 
 > Weblate is a translation tool with tight version control integration featuring a simple and clean user interface, propagation of translations across components, quality checks and automatic linking to source files.
@@ -15,6 +17,8 @@ git clone https://github.com/beevelop/docker-weblate && cd docker-weblate
 # Adjust the docker-compose.yml to your needs
 docker-compose up
 ```
+Navigate to `http://*YOURHOST*:8000` and login with `Admin:Un1c0rn`.
+
 
 ### Manually
 ```bash
@@ -28,8 +32,8 @@ docker run -it -p 8000:8000 --name dev-weblate \
     -e WEBLATE_EMAIL=john@example.com \
     --link dev-weblate-postgres:database beevelop/weblate
 ```
-
 You should then be able to access Weblate via `http://*YOUR_HOST*:8000`.
+> Attention: To persist changes you need to bind the volumes `/app/data` and `/app/config` for the Weblate container and the respective volumes for the Postgres container.
 
 ## Configuration
 - `WEBLATE_DEBUG`
