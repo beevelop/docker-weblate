@@ -567,7 +567,8 @@ SERVER_EMAIL = os.environ.get('WEBLATE_EMAIL', 'weblate@example.com')
 DEFAULT_FROM_EMAIL = os.environ.get('WEBLATE_EMAIL', 'weblate@example.com')
 
 # List of URLs your site is supposed to serve
-ALLOWED_HOSTS = []
+aHost = os.environ.get('WEBLATE_ALLOWED_HOSTS', [])
+ALLOWED_HOSTS = aHost.split(',') if isinstance(aHost, str) else aHost
 
 # Example configuration to use memcached for caching
 CACHES = {
