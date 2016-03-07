@@ -30,6 +30,8 @@ server:
   links:
     - database
     - cache
+  ports:
+    - "8000:8000"
   volumes_from:
     - volumes
   restart: always
