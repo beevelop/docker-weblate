@@ -15,7 +15,7 @@ translate-toolkit==1.13.0
 pyLibravatar==1.7
 pydns==2.3.6
 Babel==2.2.0
-Weblate==2.4
+Weblate==2.5
 pyuca==1.1
 python-memcached==1.57
 django_compressor==1.6
