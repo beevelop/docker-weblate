@@ -54,6 +54,7 @@ You should then be able to access Weblate via `http://*YOUR_HOST*:8000`.
     + [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 - `SITE_TITLE` (default: Weblate)
 - `ADMIN_PASSWORD` (default: Un1c0rn)
+- `REGISTRATION_OPEN` (default: `True`): Set to `False` to disable registration functionality
 
 ### Email
 - `EMAIL_HOST`
