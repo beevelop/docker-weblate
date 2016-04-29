@@ -228,13 +228,13 @@ GITHUB_USERNAME = None
 # Authentication configuration
 AUTHENTICATION_BACKENDS = (
     'social.backends.email.EmailAuth',
-    # 'social.backends.google.GoogleOAuth2',
-    # 'social.backends.github.GithubOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.github.GithubOAuth2',
     # 'social.backends.bitbucket.BitbucketOAuth',
     # 'social.backends.suse.OpenSUSEOpenId',
     # 'social.backends.ubuntu.UbuntuOpenId',
     # 'social.backends.fedora.FedoraOpenId',
-    # 'social.backends.facebook.FacebookOAuth2',
+    'social.backends.facebook.FacebookOAuth2',
     'weblate.accounts.auth.WeblateUserBackend',
 )
 
