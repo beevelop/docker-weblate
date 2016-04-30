@@ -10,7 +10,7 @@ server:
   container_name: weblate
   image: beevelop/weblate
   environment:
-    SECRET_KEY: Un1c0rns_4R3_4w3$0m3
+    SECRET_KEY: Un1c0rns_4R3_4w3s0m3
     ADMIN_PASSWORD: Un1c0rn
 
     TIME_ZONE: Europe/Berlin
