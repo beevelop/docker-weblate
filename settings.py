@@ -226,33 +226,37 @@ TEMPLATE_LOADERS = (
 GITHUB_USERNAME = None
 
 # Authentication configuration
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'social.backends.email.EmailAuth',
-    # 'social.backends.google.GoogleOAuth2',
-    # 'social.backends.github.GithubOAuth2',
-    # 'social.backends.bitbucket.BitbucketOAuth',
     # 'social.backends.suse.OpenSUSEOpenId',
     # 'social.backends.ubuntu.UbuntuOpenId',
     # 'social.backends.fedora.FedoraOpenId',
-    # 'social.backends.facebook.FacebookOAuth2',
     'weblate.accounts.auth.WeblateUserBackend',
-)
+]
 
-# Social auth backends setup
-SOCIAL_AUTH_GITHUB_KEY = ''
-SOCIAL_AUTH_GITHUB_SECRET = ''
+if ('SOCIAL_AUTH_GITHUB_KEY' in os.environ) :
+    AUTHENTICATION_BACKENDS.append('social.backends.github.GithubOAuth2')
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get('SOCIAL_AUTH_GITHUB_KEY', '')
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET', '')
 SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
 
-SOCIAL_AUTH_BITBUCKET_KEY = ''
-SOCIAL_AUTH_BITBUCKET_SECRET = ''
+
+if ('SOCIAL_AUTH_BITBUCKET_KEY' in os.environ) :
+    AUTHENTICATION_BACKENDS.append('social.backends.bitbucket.BitbucketOAuth')
+SOCIAL_AUTH_BITBUCKET_KEY = os.environ.get('SOCIAL_AUTH_BITBUCKET_KEY', '')
+SOCIAL_AUTH_BITBUCKET_SECRET = os.environ.get('SOCIAL_AUTH_BITBUCKET_SECRET', '')
 SOCIAL_AUTH_BITBUCKET_VERIFIED_EMAILS_ONLY = True
 
-SOCIAL_AUTH_FACEBOOK_KEY = ''
-SOCIAL_AUTH_FACEBOOK_SECRET = ''
+if ('SOCIAL_AUTH_FACEBOOK_KEY' in os.environ) :
+    AUTHENTICATION_BACKENDS.append('social.backends.facebook.FacebookOAuth2')
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'public_profile']
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+if ('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY' in os.environ) :
+    AUTHENTICATION_BACKENDS.append('social.backends.google.GoogleOAuth2')
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', '')
 
 # Social auth settings
 SOCIAL_AUTH_PIPELINE = (
