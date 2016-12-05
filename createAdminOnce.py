@@ -7,11 +7,14 @@ import sys,os
 from django.contrib.auth.models import User
 from django.core.management import call_command
 
+admin_username = os.getenv('WEBLATE_ADMIN_NAME', 'admin')
+
 try:
-  user = User.objects.get(username='admin')
+  user = User.objects.get(username=admin_username)
 except:
   print 'Creating Admin...'
-  call_command('createadmin', password=os.getenv('ADMIN_PASSWORD', 'Un1c0rn'))
+  User.objects.create_superuser(admin_username, os.getenv('WEBLATE_ADMIN_EMAIL', 'admin@example.com'), os.getenv('ADMIN_PASSWORD', 'Un1c0rn'))
+  # call_command('createadmin', password=os.getenv('ADMIN_PASSWORD', 'Un1c0rn'))
   sys.exit(0)
 else:
   print 'Admin seems to exist. Not creating admin...'
