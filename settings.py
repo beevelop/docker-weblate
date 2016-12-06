@@ -30,7 +30,7 @@ from logging.handlers import SysLogHandler
 DEBUG = os.environ.get('WEBLATE_DEBUG', '1') == '1'
 
 ADMINS = (
-    (os.environ['WEBLATE_ADMIN_NAME'], os.environ['WEBLATE_ADMIN_EMAIL']),
+    (os.getenv('WEBLATE_ADMIN_NAME', 'admin'), os.getenv('WEBLATE_ADMIN_EMAIL', 'admin@example.com')),
     # ('Your Name', 'your_email@example.com'),
 )
 
