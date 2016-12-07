@@ -18,29 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import django
+from __future__ import unicode_literals
+import platform
 import os
 from logging.handlers import SysLogHandler
-
-#
-# Safety check for running with too old Django version
-#
-
-if django.VERSION < (1, 4, 0):
-    raise Exception(
-        'Weblate needs Django 1.4 or newer, you are using %s!' %
-        django.get_version()
-    )
 
 #
 # Django settings for Weblate project.
 #
 
 DEBUG = os.environ.get('WEBLATE_DEBUG', '1') == '1'
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    (os.environ['WEBLATE_ADMIN_NAME'], os.environ['WEBLATE_ADMIN_EMAIL']),
+    (os.getenv('WEBLATE_ADMIN_NAME', 'admin'), os.getenv('WEBLATE_ADMIN_EMAIL', 'admin@example.com')),
     # ('Your Name', 'your_email@example.com'),
 )
 
@@ -123,40 +113,42 @@ TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE' ,'en-us')
 
 LANGUAGES = (
-    ('az', u'Azərbaycan'),
-    ('be', u'Беларуская'),
-    ('be@latin', u'Biełaruskaja'),
-    ('br', u'Brezhoneg'),
-    ('ca', u'Català'),
-    ('cs', u'Čeština'),
-    ('da', u'Dansk'),
-    ('de', u'Deutsch'),
-    ('en', u'English'),
-    ('el', u'Ελληνικά'),
-    ('es', u'Español'),
-    ('fi', u'Suomi'),
-    ('fr', u'Français'),
-    ('fy', u'Frysk'),
-    ('gl', u'Galego'),
-    ('he', u'עברית'),
-    ('hu', u'Magyar'),
+    ('az', 'Azərbaycan'),
+    ('be', 'Беларуская'),
+    ('be@latin', 'Biełaruskaja'),
+    ('br', 'Brezhoneg'),
+    ('ca', 'Català'),
+    ('cs', 'Čeština'),
+    ('da', 'Dansk'),
+    ('de', 'Deutsch'),
+    ('en', 'English'),
+    ('el', 'Ελληνικά'),
+    ('es', 'Español'),
+    ('fi', 'Suomi'),
+    ('fr', 'Français'),
+    ('fy', 'Frysk'),
+    ('gl', 'Galego'),
+    ('he', 'עברית'),
+    ('hu', 'Magyar'),
     ('id', 'Indonesia'),
-    ('ja', u'日本語'),
-    ('ko', u'한국어'),
-    ('ksh', u'Kölsch'),
-    ('nl', u'Nederlands'),
-    ('pl', u'Polski'),
-    ('pt', u'Português'),
-    ('pt-BR', u'Português brasileiro'),
-    ('ru', u'Русский'),
-    ('sk', u'Slovenčina'),
-    ('sl', u'Slovenščina'),
-    ('sr', u'Српски'),
-    ('sv', u'Svenska'),
-    ('tr', u'Türkçe'),
-    ('uk', u'Українська'),
-    ('zh-Hans', u'简体字'),
-    ('zh-Hant', u'正體字'),
+    ('it', 'Italiano'),
+    ('ja', '日本語'),
+    ('ko', '한국어'),
+    ('ksh', 'Kölsch'),
+    ('nb', 'Norsk bokmål'),
+    ('nl', 'Nederlands'),
+    ('pl', 'Polski'),
+    ('pt', 'Português'),
+    ('pt-br', 'Português brasileiro'),
+    ('ru', 'Русский'),
+    ('sk', 'Slovenčina'),
+    ('sl', 'Slovenščina'),
+    ('sr', 'Српски'),
+    ('sv', 'Svenska'),
+    ('tr', 'Türkçe'),
+    ('uk', 'Українська'),
+    ('zh-hans', '简体字'),
+    ('zh-hant', '正體字'),
 )
 
 SITE_ID = 1
@@ -213,26 +205,45 @@ STATICFILES_FINDERS = (
 # You can generate it using examples/generate-secret-key
 SECRET_KEY = os.environ.get('SECRET_KEY', 'Beefqjlg+5!#xu%e-oh#7!$a42!6aFf7ud*_v=#h_-b9q()o6(');
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.request',
+                'django.template.context_processors.csrf',
+                'django.contrib.messages.context_processors.messages',
+                'weblate.trans.context_processors.weblate_context',
+            ],
+            'loaders': [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
+            ],
+        },
+    },
+]
 
 # GitHub username for sending pull requests.
 # Please see the documentation for more details.
 GITHUB_USERNAME = None
 
 # Authentication configuration
-AUTHENTICATION_BACKENDS = [
-    'social.backends.email.EmailAuth',
+AUTHENTICATION_BACKENDS = (
+    'weblate.accounts.auth.EmailAuth',
+    # 'social.backends.google.GoogleOAuth2',
+    # 'social.backends.github.GithubOAuth2',
+    # 'social.backends.bitbucket.BitbucketOAuth',
     # 'social.backends.suse.OpenSUSEOpenId',
     # 'social.backends.ubuntu.UbuntuOpenId',
     # 'social.backends.fedora.FedoraOpenId',
+    # 'social.backends.facebook.FacebookOAuth2',
     'weblate.accounts.auth.WeblateUserBackend',
-]
+)
 
 if ('SOCIAL_AUTH_GITHUB_KEY' in os.environ) :
     AUTHENTICATION_BACKENDS.append('social.backends.github.GithubOAuth2')
@@ -270,11 +281,13 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.mail.mail_validation',
     'social.pipeline.social_auth.associate_by_email',
     'weblate.accounts.pipeline.verify_open',
+    'weblate.accounts.pipeline.verify_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'weblate.accounts.pipeline.user_full_name',
     'weblate.accounts.pipeline.store_email',
+    'weblate.accounts.pipeline.password_reset',
 )
 
 # Custom authentication strategy
@@ -293,6 +306,7 @@ SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 # Middleware
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -304,14 +318,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'weblate.urls'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates"
-    # or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(BASE_DIR, 'html'),
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -326,6 +332,8 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'crispy_forms',
     'compressor',
+    'rest_framework',
+    'rest_framework.authtoken',
     'weblate.trans',
     'weblate.lang',
     'weblate.accounts',
@@ -333,18 +341,8 @@ INSTALLED_APPS = (
     'weblate',
 )
 
+
 LOCALE_PATHS = (os.path.join(BASE_DIR, '..', 'locale'), )
-
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.request',
-    'django.core.context_processors.csrf',
-    'django.contrib.messages.context_processors.messages',
-    'weblate.trans.context_processors.weblate_context',
-)
 
 # Custom exception reporter to include some details
 DEFAULT_EXCEPTION_REPORTER_FILTER = \
@@ -356,7 +354,16 @@ DEFAULT_EXCEPTION_REPORTER_FILTER = \
 # - you can also choose 'logfile' to log into separate file
 #   after configuring it below
 
-if DEBUG or not os.path.exists('/dev/log'):
+# Detect if we can connect to syslog
+HAVE_SYSLOG = False
+if platform.system() != 'Windows':
+    try:
+        SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_LOCAL2)
+        HAVE_SYSLOG = True
+    except IOError:
+        HAVE_SYSLOG = False
+
+if DEBUG or not HAVE_SYSLOG:
     DEFAULT_LOG = 'console'
 else:
     DEFAULT_LOG = 'syslog'
@@ -520,16 +527,19 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.checks.chars.EndQuestionCheck',
 #     'weblate.trans.checks.chars.EndExclamationCheck',
 #     'weblate.trans.checks.chars.EndEllipsisCheck',
+#     'weblate.trans.checks.chars.MaxLengthCheck',
 #     'weblate.trans.checks.format.PythonFormatCheck',
 #     'weblate.trans.checks.format.PythonBraceFormatCheck',
 #     'weblate.trans.checks.format.PHPFormatCheck',
 #     'weblate.trans.checks.format.CFormatCheck',
 #     'weblate.trans.checks.format.JavascriptFormatCheck',
 #     'weblate.trans.checks.consistency.PluralsCheck',
+#     'weblate.trans.checks.consistency.SamePluralsCheck',
 #     'weblate.trans.checks.consistency.ConsistencyCheck',
 #     'weblate.trans.checks.chars.NewlineCountingCheck',
 #     'weblate.trans.checks.markup.BBCodeCheck',
 #     'weblate.trans.checks.chars.ZeroWidthSpaceCheck',
+#     'weblate.trans.checks.markup.XMLValidityCheck',
 #     'weblate.trans.checks.markup.XMLTagsCheck',
 #     'weblate.trans.checks.source.OptionalPluralCheck',
 #     'weblate.trans.checks.source.EllipsisCheck',
@@ -541,6 +551,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.autofixes.whitespace.SameBookendingWhitespace',
 #     'weblate.trans.autofixes.chars.ReplaceTrailingDotsWithEllipsis',
 #     'weblate.trans.autofixes.chars.RemoveZeroSpace',
+#     'weblate.trans.autofixes.chars.RemoveControlChars',
 # )
 
 # List of scripts to use in custom processing
@@ -554,8 +565,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.machine.apertium.ApertiumTranslation',
 #     'weblate.trans.machine.glosbe.GlosbeTranslation',
 #     'weblate.trans.machine.google.GoogleTranslation',
-#     'weblate.trans.machine.google.GoogleWebTranslation',
-#     'weblate.trans.machine.microsoft.MicrosoftTranslation',
+#     'weblate.trans.machine.microsoft.MicrosoftCognitiveTranslation',
 #     'weblate.trans.machine.mymemory.MyMemoryTranslation',
 #     'weblate.trans.machine.tmserver.AmagamaTranslation',
 #     'weblate.trans.machine.tmserver.TMServerTranslation',
@@ -598,16 +608,43 @@ if 'CACHE_PORT_11211_TCP_ADDR' in os.environ:
         )
     }
 
+# REST framework settings for API
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    },
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.PageNumberPagination'
+    ),
+    'PAGE_SIZE': 20,
+    'VIEW_DESCRIPTION_FUNCTION': 'weblate.api.views.get_view_description',
+}
+
 if 'WEBLATE_LOCK_DOWN' in os.environ:
     LOGIN_REQUIRED_URLS = (
         r'/(.*)$',
     )
     LOGIN_REQUIRED_URLS_EXCEPTIONS = (
         r'/accounts/(.*)$', # Required for login
-        r'/media/(.*)$',    # Required for development mode
+        r'/static/(.*)$',   # Required for development mode
         r'/widgets/(.*)$',  # Allowing public access to widgets
         r'/data/(.*)$',     # Allowing public access to data exports
         r'/hooks/(.*)$',    # Allowing public access to notification hooks
+        r'/api/(.*)$',      # Allowing access to API
     )
 
 # Enable whiteboard functionality - under development so disabled by default.
