@@ -11,7 +11,7 @@ Pillow==3.4.2
 django_compressor==1.6
 djangorestframework==3.5.3
 defusedxml==0.4.1
-Weblate==2.10
+Weblate==2.10.1
 
 pyLibravatar==1.7
 python-openid==2.2.5
