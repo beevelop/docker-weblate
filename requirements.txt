@@ -1,17 +1,19 @@
 Django==1.10.4
 Whoosh>=2.5.2,!=2.6.0
-translate-toolkit==1.14.0-rc1
+translate-toolkit==2.0.0
 lxml==3.7.0
-oauthlib==2.0.1
+Pillow==3.4.2
 six==1.10.0
 python-dateutil==2.6.0
-python-social-auth==0.2.21
+social-auth-core>=1.1.0
+social-auth-app-django>= 1.0.1
 django-crispy-forms==1.6.1
-Pillow==3.4.2
+oauthlib==2.0.1
 django_compressor==1.6
 djangorestframework==3.5.3
 defusedxml==0.4.1
-Weblate==2.10.1
+django-appconf>=1.0
+Weblate==2.11
 
 pyLibravatar==1.7
 python-openid==2.2.5
