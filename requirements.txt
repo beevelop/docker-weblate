@@ -5,8 +5,8 @@ lxml==3.7.3
 Pillow==3.4.2
 six==1.10.0
 python-dateutil==2.6.0
-social-auth-core==1.1.0
-social-auth-app-django==1.0.1
+social-auth-core==1.2.0
+social-auth-app-django==1.1.0
 django-crispy-forms==1.6.1
 oauthlib==2.0.1
 django_compressor==2.1.1
