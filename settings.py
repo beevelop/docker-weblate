@@ -506,7 +506,7 @@ if (os.environ.get('DJANGO_IS_MANAGEMENT_COMMAND', False) and
     LOGGING['loggers']['weblate']['handlers'].append('console')
 
 # Remove syslog setup if it's not present
-if not HAVE_SYSLOG::
+if not HAVE_SYSLOG:
     del LOGGING['handlers']['syslog']
 
 # List of machine translations
