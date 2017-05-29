@@ -673,7 +673,7 @@ ALLOWED_HOSTS = aHost.split(',') if isinstance(aHost, str) else aHost
 # Example configuration to use memcached for caching
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
     'avatar': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
