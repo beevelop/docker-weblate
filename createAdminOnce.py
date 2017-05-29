@@ -14,7 +14,7 @@ try:
 except:
   print 'Creating Admin...'
   User.objects.create_superuser(admin_username, os.getenv('WEBLATE_ADMIN_EMAIL', 'admin@example.com'), os.getenv('ADMIN_PASSWORD', 'Un1c0rn'))
-  # call_command('createadmin', password=os.getenv('ADMIN_PASSWORD', 'Un1c0rn'))
+  print 'Admin user has been created! Login with ' + os.getenv('WEBLATE_ADMIN_EMAIL', 'admin@example.com')
   sys.exit(0)
 else:
   print 'Admin seems to exist. Not creating admin...'
