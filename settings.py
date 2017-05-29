@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2012 - 2015 Michal Čihař <michal@cihar.com>
+# Copyright © 2012 - 2017 Michal Čihař <michal@cihar.com>
 #
-# This file is part of Weblate <http://weblate.org/>
+# This file is part of Weblate <https://weblate.org/>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 from __future__ import unicode_literals
@@ -116,6 +116,7 @@ LANGUAGES = (
     ('az', 'Azərbaycan'),
     ('be', 'Беларуская'),
     ('be@latin', 'Biełaruskaja'),
+    ('bg', 'Български'),
     ('br', 'Brezhoneg'),
     ('ca', 'Català'),
     ('cs', 'Čeština'),
@@ -271,27 +272,46 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SEC
 
 # Social auth settings
 SOCIAL_AUTH_PIPELINE = (
+    'weblate.accounts.pipeline.verify_open',
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.social_auth.social_user',
+    'weblate.accounts.pipeline.store_params',
     'social_core.pipeline.user.get_username',
     'weblate.accounts.pipeline.require_email',
     'social_core.pipeline.mail.mail_validation',
+    'weblate.accounts.pipeline.revoke_mail_code',
+    'weblate.accounts.pipeline.ensure_valid',
+    'weblate.accounts.pipeline.reauthenticate',
     'social_core.pipeline.social_auth.associate_by_email',
-    'weblate.accounts.pipeline.verify_open',
     'weblate.accounts.pipeline.verify_username',
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
+    'weblate.accounts.pipeline.cleanup_next',
     'weblate.accounts.pipeline.user_full_name',
     'weblate.accounts.pipeline.store_email',
+    'weblate.accounts.pipeline.notify_connect',
     'weblate.accounts.pipeline.password_reset',
+)
+
+SOCIAL_AUTH_DISCONNECT_PIPELINE = (
+    'social_core.pipeline.disconnect.allowed_to_disconnect',
+    'social_core.pipeline.disconnect.get_entries',
+    'social_core.pipeline.disconnect.revoke_tokens',
+    'weblate.accounts.pipeline.cycle_session',
+    'weblate.accounts.pipeline.adjust_primary_mail',
+    'weblate.accounts.pipeline.notify_disconnect',
+    'social_core.pipeline.disconnect.disconnect',
+    'weblate.accounts.pipeline.cleanup_next',
 )
 
 # Custom authentication strategy
 SOCIAL_AUTH_STRATEGY = 'weblate.accounts.strategy.WeblateStrategy'
+
+# Avoid raising exceptions even in debug mode
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = \
     'weblate.accounts.pipeline.send_validation'
@@ -304,10 +324,31 @@ SOCIAL_AUTH_PROTECTED_USER_FIELDS = ('email',)
 SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 SOCIAL_AUTH_SLUGIFY_FUNCTION = 'weblate.accounts.pipeline.slugify_username'
 
+# Password validation configuration
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 6,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'weblate.accounts.password_validation.CharsPasswordValidator',
+    },
+]
+
 # Middleware
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -316,6 +357,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'weblate.accounts.middleware.RequireLoginMiddleware',
+    'weblate.middleware.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'weblate.urls'
@@ -327,7 +369,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
+    'django.contrib.admin.apps.SimpleAdminConfig',
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
     'social_django',
@@ -337,13 +379,20 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'weblate.trans',
     'weblate.lang',
+    'weblate.permissions',
+    'weblate.screenshots',
     'weblate.accounts',
-    # Needed for javascript localization
+    'weblate.utils',
+
+    # Optional: Git exporter
+    # 'weblate.gitexport',
+
+    # This application has to be placed last!
     'weblate',
 )
 
-
-LOCALE_PATHS = (os.path.join(BASE_DIR, '..', 'locale'), )
+# Path to locales
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'), )
 
 # Custom exception reporter to include some details
 DEFAULT_EXCEPTION_REPORTER_FILTER = \
@@ -397,7 +446,8 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
         },
         'console': {
             'level': 'DEBUG',
@@ -437,10 +487,16 @@ LOGGING = {
             'level': 'DEBUG',
         },
         # Logging VCS operations
-        #'weblate-vcs': {
-        #    'handlers': [DEFAULT_LOG],
-        #    'level': 'DEBUG',
-        #},
+        # 'weblate-vcs': {
+        #     'handlers': [DEFAULT_LOG],
+        #     'level': 'DEBUG',
+        # },
+
+        # Python Social Auth logging
+        # 'social': {
+        #     'handlers': [DEFAULT_LOG],
+        #     'level': 'DEBUG',
+        # },
     }
 }
 
@@ -450,8 +506,22 @@ if (os.environ.get('DJANGO_IS_MANAGEMENT_COMMAND', False) and
     LOGGING['loggers']['weblate']['handlers'].append('console')
 
 # Remove syslog setup if it's not present
-if not os.path.exists('/dev/log'):
+if not HAVE_SYSLOG::
     del LOGGING['handlers']['syslog']
+
+# List of machine translations
+# MACHINE_TRANSLATION_SERVICES = (
+#     'weblate.trans.machine.apertium.ApertiumAPYTranslation',
+#     'weblate.trans.machine.glosbe.GlosbeTranslation',
+#     'weblate.trans.machine.google.GoogleTranslation',
+#     'weblate.trans.machine.microsoft.MicrosoftCognitiveTranslation',
+#     'weblate.trans.machine.mymemory.MyMemoryTranslation',
+#     'weblate.trans.machine.tmserver.AmagamaTranslation',
+#     'weblate.trans.machine.tmserver.TMServerTranslation',
+#     'weblate.trans.machine.yandex.YandexTranslation',
+#     'weblate.trans.machine.weblatetm.WeblateSimilarTranslation',
+#     'weblate.trans.machine.weblatetm.WeblateTranslation',
+# )
 
 # Machine translation API keys
 
@@ -463,8 +533,12 @@ MT_APERTIUM_KEY = None
 MT_MICROSOFT_ID = None
 MT_MICROSOFT_SECRET = None
 
+# Microsoft Cognitive Services Translator API, register at
+# https://portal.azure.com/
+MT_MICROSOFT_COGNITIVE_KEY = None
+
 # MyMemory identification email, see
-# http://mymemory.translated.net/doc/spec.php
+# https://mymemory.translated.net/doc/spec.php
 MT_MYMEMORY_EMAIL = None
 
 # Optional MyMemory credentials to access private translation memory
@@ -474,29 +548,46 @@ MT_MYMEMORY_KEY = None
 # Google API key for Google Translate API
 MT_GOOGLE_KEY = None
 
+# API key for Yandex Translate API
+MT_YANDEX_KEY = None
+
 # tmserver URL
 MT_TMSERVER = None
 
 # Title of site to use
 SITE_TITLE = os.environ.get('SITE_TITLE', 'Weblate')
 
+# Whether site uses https
+ENABLE_HTTPS = False
+
+# Make CSRF cookie HttpOnly, see documentation for more details:
+# https://docs.djangoproject.com/en/1.11/ref/settings/#csrf-cookie-httponly
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = ENABLE_HTTPS
+SESSION_COOKIE_SECURE = ENABLE_HTTPS
+
 # URL of login
-LOGIN_URL = '%s/accounts/login/' % URL_PREFIX
+LOGIN_URL = '{0}/accounts/login/'.format(URL_PREFIX)
 
 # URL of logout
-LOGOUT_URL = '%s/accounts/logout/' % URL_PREFIX
+LOGOUT_URL = '{0}/accounts/logout/'.format(URL_PREFIX)
 
 # Default location for login
-LOGIN_REDIRECT_URL = '%s/' % URL_PREFIX
+LOGIN_REDIRECT_URL = '{0}/'.format(URL_PREFIX)
 
 # Anonymous user name
 ANONYMOUS_USER_NAME = 'anonymous'
 
+# Reverse proxy settings
+IP_BEHIND_REVERSE_PROXY = False
+IP_PROXY_HEADER = 'HTTP_X_FORWARDED_FOR'
+IP_PROXY_OFFSET = 0
+
 # Sending HTML in mails
-EMAIL_SEND_HTML = False
+EMAIL_SEND_HTML = True
 
 # Subject of emails includes site title
-EMAIL_SUBJECT_PREFIX = u'[{0}] '.format(SITE_TITLE)
+EMAIL_SUBJECT_PREFIX = '[{0}] '.format(SITE_TITLE)
 
 # Enable remote hooks
 ENABLE_HOOKS = True
@@ -533,6 +624,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.checks.chars.EndQuestionCheck',
 #     'weblate.trans.checks.chars.EndExclamationCheck',
 #     'weblate.trans.checks.chars.EndEllipsisCheck',
+#     'weblate.trans.checks.chars.EndSemicolonCheck',
 #     'weblate.trans.checks.chars.MaxLengthCheck',
 #     'weblate.trans.checks.format.PythonFormatCheck',
 #     'weblate.trans.checks.format.PythonBraceFormatCheck',
@@ -542,6 +634,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.checks.consistency.PluralsCheck',
 #     'weblate.trans.checks.consistency.SamePluralsCheck',
 #     'weblate.trans.checks.consistency.ConsistencyCheck',
+#     'weblate.trans.checks.consistency.TranslatedCheck',
 #     'weblate.trans.checks.chars.NewlineCountingCheck',
 #     'weblate.trans.checks.markup.BBCodeCheck',
 #     'weblate.trans.checks.chars.ZeroWidthSpaceCheck',
@@ -566,19 +659,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # PRE_COMMIT_SCRIPTS = (
 # )
 
-# List of machine translations
-# MACHINE_TRANSLATION_SERVICES = (
-#     'weblate.trans.machine.apertium.ApertiumTranslation',
-#     'weblate.trans.machine.glosbe.GlosbeTranslation',
-#     'weblate.trans.machine.google.GoogleTranslation',
-#     'weblate.trans.machine.microsoft.MicrosoftCognitiveTranslation',
-#     'weblate.trans.machine.mymemory.MyMemoryTranslation',
-#     'weblate.trans.machine.tmserver.AmagamaTranslation',
-#     'weblate.trans.machine.tmserver.TMServerTranslation',
-#     'weblate.trans.machine.weblatetm.WeblateSimilarTranslation',
-#     'weblate.trans.machine.weblatetm.WeblateTranslation',
-# )
-
 # E-mail address that error messages come from.
 SERVER_EMAIL = os.environ.get('WEBLATE_EMAIL', 'weblate@example.com')
 
@@ -593,12 +673,12 @@ ALLOWED_HOSTS = aHost.split(',') if isinstance(aHost, str) else aHost
 # Example configuration to use memcached for caching
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
     },
     'avatar': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(DATA_DIR, 'avatar-cache'),
-        'TIMEOUT': 604800,
+        'TIMEOUT': 3600,
         'OPTIONS': {
             'MAX_ENTRIES': 1000,
         },
@@ -638,6 +718,7 @@ REST_FRAMEWORK = {
     ),
     'PAGE_SIZE': 20,
     'VIEW_DESCRIPTION_FUNCTION': 'weblate.api.views.get_view_description',
+    'UNAUTHENTICATED_USER': 'weblate.accounts.models.get_anonymous',
 }
 
 if 'WEBLATE_LOCK_DOWN' in os.environ:
