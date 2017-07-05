@@ -123,6 +123,7 @@ LANGUAGES = (
     ('da', 'Dansk'),
     ('de', 'Deutsch'),
     ('en', 'English'),
+    ('en-gb', 'English (United Kingdom)'),
     ('el', 'Ελληνικά'),
     ('es', 'Español'),
     ('fi', 'Suomi'),
@@ -235,7 +236,7 @@ GITHUB_USERNAME = None
 
 # Authentication configuration
 AUTHENTICATION_BACKENDS = (
-    'weblate.accounts.auth.EmailAuth',
+    'social_core.backends.email.EmailAuth',
     # 'social_core.backends.google.GoogleOAuth2',
     # 'social_core.backends.github.GithubOAuth2',
     # 'social_core.backends.bitbucket.BitbucketOAuth',
@@ -310,8 +311,8 @@ SOCIAL_AUTH_DISCONNECT_PIPELINE = (
 # Custom authentication strategy
 SOCIAL_AUTH_STRATEGY = 'weblate.accounts.strategy.WeblateStrategy'
 
-# Avoid raising exceptions even in debug mode
-SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+# Raise exceptions so that we can handle them later
+SOCIAL_AUTH_RAISE_EXCEPTIONS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = \
     'weblate.accounts.pipeline.send_validation'
@@ -565,6 +566,10 @@ ENABLE_HTTPS = False
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = ENABLE_HTTPS
 SESSION_COOKIE_SECURE = ENABLE_HTTPS
+# Store CSRF token in session (since Django 1.11)
+CSRF_USE_SESSIONS = True
+# Session cookie age (in seconds)
+SESSION_COOKIE_AGE = 1209600
 
 # URL of login
 LOGIN_URL = '{0}/accounts/login/'.format(URL_PREFIX)
@@ -630,6 +635,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.trans.checks.format.PythonBraceFormatCheck',
 #     'weblate.trans.checks.format.PHPFormatCheck',
 #     'weblate.trans.checks.format.CFormatCheck',
+#     'weblate.trans.checks.format.PerlFormatCheck',
 #     'weblate.trans.checks.format.JavascriptFormatCheck',
 #     'weblate.trans.checks.consistency.PluralsCheck',
 #     'weblate.trans.checks.consistency.SamePluralsCheck',
