@@ -14,7 +14,7 @@ django_compressor==2.1.1
 djangorestframework==3.6.3
 defusedxml==0.5.0
 django-appconf==1.0.2
-Weblate==2.15
+Weblate==2.16
 
 pyLibravatar==1.7
 python-openid==2.2.5
