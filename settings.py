@@ -102,7 +102,6 @@ else:
         # Wrap each view in a transaction on this database
         'ATOMIC_REQUESTS': True,
     }
-}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
