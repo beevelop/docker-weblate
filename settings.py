@@ -394,7 +394,6 @@ MIDDLEWARE = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'weblate.accounts.middleware.RequireLoginMiddleware',
     'weblate.middleware.SecurityMiddleware',
-    'weblate.wladmin.middleware.ConfigurationErrorsMiddleware',
 ]
 
 ROOT_URLCONF = 'weblate.urls'
@@ -415,10 +414,8 @@ INSTALLED_APPS = (
     'compressor',
     'rest_framework',
     'rest_framework.authtoken',
-    'weblate.addons',
     'weblate.trans',
     'weblate.lang',
-    'weblate.langdata',
     'weblate.permissions',
     'weblate.screenshots',
     'weblate.accounts',
