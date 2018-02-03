@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2012 - 2017 Michal Čihař <michal@cihar.com>
+# Copyright © 2012 - 2018 Michal Čihař <michal@cihar.com>
 #
 # This file is part of Weblate <https://weblate.org/>
 #
@@ -92,6 +92,15 @@ else:
         'HOST': '127.0.0.1',
         # Set to empty string for default. Not used with sqlite3.
         'PORT': '',
+        # Customizations for databases
+        'OPTIONS': {
+            # Uncomment for MySQL older than 5.7:
+            # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            # Set emoji capable charset for MySQL:
+            # 'charset': 'utf8mb4',
+        },
+        # Wrap each view in a transaction on this database
+        'ATOMIC_REQUESTS': True,
     }
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -113,6 +122,7 @@ TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE' ,'en-us')
 
 LANGUAGES = (
+    ('ar', 'العربية'),
     ('az', 'Azərbaycan'),
     ('be', 'Беларуская'),
     ('be@latin', 'Biełaruskaja'),
@@ -164,7 +174,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = False
+USE_TZ = True
 
 # URL prefix to use, please see documentation for more details
 URL_PREFIX = ''
@@ -176,7 +186,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '%s/media/' % URL_PREFIX
+MEDIA_URL = '{0}/media/'.format(URL_PREFIX)
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -186,7 +196,7 @@ STATIC_ROOT = os.path.join(DATA_DIR, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '%s/static/' % URL_PREFIX
+STATIC_URL = '{0}/static/'.format(URL_PREFIX)
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -210,6 +220,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'Beefqjlg+5!#xu%e-oh#7!$a42!6aFf7ud*_v
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'weblate', 'templates'),
+        ],
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
@@ -273,19 +286,20 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SEC
 
 # Social auth settings
 SOCIAL_AUTH_PIPELINE = (
-    'weblate.accounts.pipeline.verify_open',
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'weblate.accounts.pipeline.store_params',
+    'weblate.accounts.pipeline.verify_open',
     'social_core.pipeline.user.get_username',
     'weblate.accounts.pipeline.require_email',
     'social_core.pipeline.mail.mail_validation',
     'weblate.accounts.pipeline.revoke_mail_code',
     'weblate.accounts.pipeline.ensure_valid',
-    'weblate.accounts.pipeline.reauthenticate',
+    'weblate.accounts.pipeline.remove_account',
     'social_core.pipeline.social_auth.associate_by_email',
+    'weblate.accounts.pipeline.reauthenticate',
     'weblate.accounts.pipeline.verify_username',
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
@@ -316,11 +330,14 @@ SOCIAL_AUTH_RAISE_EXCEPTIONS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = \
     'weblate.accounts.pipeline.send_validation'
-SOCIAL_AUTH_EMAIL_VALIDATION_URL = '%s/accounts/email-sent/' % URL_PREFIX
-SOCIAL_AUTH_LOGIN_ERROR_URL = '%s/accounts/login/' % URL_PREFIX
-SOCIAL_AUTH_EMAIL_FORM_URL = '%s/accounts/email/' % URL_PREFIX
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = \
+    '{0}/accounts/email-sent/'.format(URL_PREFIX)
+SOCIAL_AUTH_LOGIN_ERROR_URL = \
+    '{0}/accounts/login/'.format(URL_PREFIX)
+SOCIAL_AUTH_EMAIL_FORM_URL = \
+    '{0}/accounts/email/'.format(URL_PREFIX)
 SOCIAL_AUTH_NEW_ASSOCIATION_REDIRECT_URL = \
-    '%s/accounts/profile/#auth' % URL_PREFIX
+    '{0}/accounts/profile/#auth'.format(URL_PREFIX)
 SOCIAL_AUTH_PROTECTED_USER_FIELDS = ('email',)
 SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 SOCIAL_AUTH_SLUGIFY_FUNCTION = 'weblate.accounts.pipeline.slugify_username'
@@ -345,10 +362,22 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'weblate.accounts.password_validation.CharsPasswordValidator',
     },
+    {
+        'NAME': 'weblate.accounts.password_validation.PastPasswordsValidator',
+    },
+    # Optional password strength validation by django-zxcvbn-password
+    # {
+    #     'NAME': 'zxcvbn_password.ZXCVBNValidator',
+    #     'OPTIONS': {
+    #         'min_score': 3,
+    #         'user_attributes': ('username', 'email', 'first_name')
+    #     }
+    # },
 ]
 
 # Middleware
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -359,10 +388,11 @@ MIDDLEWARE_CLASSES = (
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'weblate.accounts.middleware.RequireLoginMiddleware',
     'weblate.middleware.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'weblate.urls'
 
+# Django and Weblate apps
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -384,16 +414,15 @@ INSTALLED_APPS = (
     'weblate.screenshots',
     'weblate.accounts',
     'weblate.utils',
+    'weblate.wladmin',
+    'weblate',
 
     # Optional: Git exporter
     # 'weblate.gitexport',
-
-    # This application has to be placed last!
-    'weblate',
 )
 
 # Path to locales
-LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'), )
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'weblate', 'locale'), )
 
 # Custom exception reporter to include some details
 DEFAULT_EXCEPTION_REPORTER_FILTER = \
@@ -409,7 +438,10 @@ DEFAULT_EXCEPTION_REPORTER_FILTER = \
 HAVE_SYSLOG = False
 if platform.system() != 'Windows':
     try:
-        SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_LOCAL2)
+        handler = SysLogHandler(
+            address='/dev/log', facility=SysLogHandler.LOG_LOCAL2
+        )
+        handler.close()
         HAVE_SYSLOG = True
     except IOError:
         HAVE_SYSLOG = False
@@ -492,7 +524,6 @@ LOGGING = {
         #     'handlers': [DEFAULT_LOG],
         #     'level': 'DEBUG',
         # },
-
         # Python Social Auth logging
         # 'social': {
         #     'handlers': [DEFAULT_LOG],
@@ -522,12 +553,13 @@ if not HAVE_SYSLOG:
 #     'weblate.trans.machine.yandex.YandexTranslation',
 #     'weblate.trans.machine.weblatetm.WeblateSimilarTranslation',
 #     'weblate.trans.machine.weblatetm.WeblateTranslation',
+#     'weblate.trans.machine.saptranslationhub.SAPTranslationHub',
 # )
 
 # Machine translation API keys
 
-# Apertium Web Service, register at http://api.apertium.org/register.jsp
-MT_APERTIUM_KEY = None
+# URL of the Apertium APy server
+MT_APERTIUM_APY = None
 
 # Microsoft Translator service, register at
 # https://datamarket.azure.com/developer/applications/
@@ -555,19 +587,31 @@ MT_YANDEX_KEY = None
 # tmserver URL
 MT_TMSERVER = None
 
+# SAP Translation Hub
+MT_SAP_BASE_URL = None
+MT_SAP_SANDBOX_APIKEY = None
+MT_SAP_USERNAME = None
+MT_SAP_PASSWORD = None
+MT_SAP_USE_MT = True
+
 # Title of site to use
 SITE_TITLE = os.environ.get('SITE_TITLE', 'Weblate')
 
 # Whether site uses https
 ENABLE_HTTPS = False
 
+# Use HTTPS when creating redirect URLs for social authentication, see
+# documentation for more details:
+# http://python-social-auth-docs.readthedocs.io/en/latest/configuration/settings.html#processing-redirects-and-urlopen
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = ENABLE_HTTPS
+
 # Make CSRF cookie HttpOnly, see documentation for more details:
 # https://docs.djangoproject.com/en/1.11/ref/settings/#csrf-cookie-httponly
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = ENABLE_HTTPS
-SESSION_COOKIE_SECURE = ENABLE_HTTPS
 # Store CSRF token in session (since Django 1.11)
 CSRF_USE_SESSIONS = True
+SESSION_COOKIE_SECURE = ENABLE_HTTPS
 # Session cookie age (in seconds)
 SESSION_COOKIE_AGE = 1209600
 
@@ -609,10 +653,8 @@ LAZY_COMMITS = True
 # Offload indexing
 OFFLOAD_INDEXING = False
 
-# Translation locking
-AUTO_LOCK = True
-AUTO_LOCK_TIME = 60
-LOCK_TIME = 15 * 60
+# Use simple language codes for default language/country combinations
+SIMPLIFY_LANGUAGES = True
 
 # Render forms using bootstrap
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
@@ -740,18 +782,15 @@ if 'WEBLATE_LOCK_DOWN' in os.environ:
         r'/api/(.*)$',      # Allowing access to API
     )
 
-# Enable whiteboard functionality - under development so disabled by default.
-ENABLE_WHITEBOARD = False
+# In such case you will want to include some of the exceptions
+# LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+#    r'/accounts/(.*)$', # Required for login
+#    r'/static/(.*)$',   # Required for development mode
+#    r'/widgets/(.*)$',  # Allowing public access to widgets
+#    r'/data/(.*)$',     # Allowing public access to data exports
+#    r'/hooks/(.*)$',    # Allowing public access to notification hooks
+#    r'/api/(.*)$',      # Allowing access to API
+# )
 
 # Force sane test runner
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-# Email server
-EMAIL_USE_TLS = True
-EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
-
-# Enable or disable registration
-REGISTRATION_OPEN = os.environ.get('REGISTRATION_OPEN', 'True').lower() != 'false'
