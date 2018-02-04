@@ -284,6 +284,12 @@ if ('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY' in os.environ) :
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', '')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', '')
 
+if ('SOCIAL_AUTH_GITLAB_KEY' in os.environ) :
+    AUTHENTICATION_BACKENDS.append('social_core.backends.gitlab.GitLabOAuth2')
+SOCIAL_AUTH_GITLAB_KEY = os.environ.get('SOCIAL_AUTH_GITLAB_KEY', '')
+SOCIAL_AUTH_GITLAB_SECRET = os.environ.get('SOCIAL_AUTH_GITLAB_SECRET', '')
+SOCIAL_AUTH_GITLAB_SCOPE = ['api']
+
 # Social auth settings
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
