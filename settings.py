@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-GenerateFileAddon',
+# -*- coding: utf-8 -*-
 #
 # Copyright © 2012 - 2018 Michal Čihař <michal@cihar.com>
 #
@@ -99,8 +99,6 @@ else:
             # Set emoji capable charset for MySQL:
             # 'charset': 'utf8mb4',
         },
-        # Wrap each view in a transaction on this database
-        'ATOMIC_REQUESTS': True,
     }
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -419,6 +417,7 @@ INSTALLED_APPS = (
     'weblate.trans',
     'weblate.lang',
     'weblate.langdata',
+    'weblate.memory',
     'weblate.permissions',
     'weblate.screenshots',
     'weblate.accounts',
@@ -567,6 +566,7 @@ if not HAVE_SYSLOG:
 # List of machine translations
 # MACHINE_TRANSLATION_SERVICES = (
 #     'weblate.trans.machine.apertium.ApertiumAPYTranslation',
+#     'weblate.trans.machine.deepl.DeepLTranslation',
 #     'weblate.trans.machine.glosbe.GlosbeTranslation',
 #     'weblate.trans.machine.google.GoogleTranslation',
 #     'weblate.trans.machine.microsoft.MicrosoftCognitiveTranslation',
@@ -574,9 +574,9 @@ if not HAVE_SYSLOG:
 #     'weblate.trans.machine.tmserver.AmagamaTranslation',
 #     'weblate.trans.machine.tmserver.TMServerTranslation',
 #     'weblate.trans.machine.yandex.YandexTranslation',
-#     'weblate.trans.machine.weblatetm.WeblateSimilarTranslation',
 #     'weblate.trans.machine.weblatetm.WeblateTranslation',
 #     'weblate.trans.machine.saptranslationhub.SAPTranslationHub',
+#     'weblate.memory.machine.WeblateMemory',
 # )
 
 # Machine translation API keys
@@ -584,10 +584,8 @@ if not HAVE_SYSLOG:
 # URL of the Apertium APy server
 MT_APERTIUM_APY = None
 
-# Microsoft Translator service, register at
-# https://datamarket.azure.com/developer/applications/
-MT_MICROSOFT_ID = None
-MT_MICROSOFT_SECRET = None
+# DeepL API key
+MT_DEEPL_KEY = None
 
 # Microsoft Cognitive Services Translator API, register at
 # https://portal.azure.com/
@@ -670,9 +668,6 @@ BACKGROUND_HOOKS = True
 # Number of nearby messages to show in each direction
 NEARBY_MESSAGES = 5
 
-# Enable lazy commits
-LAZY_COMMITS = True
-
 # Offload indexing
 OFFLOAD_INDEXING = False
 
@@ -730,10 +725,13 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #     'weblate.addons.gettext.UpdateLinguasAddon',
 #     'weblate.addons.gettext.UpdateConfigureAddon',
 #     'weblate.addons.gettext.MsgmergeAddon',
+#     'weblate.addons.gettext.GettextCustomizeAddon',
 #     'weblate.addons.cleanup.CleanupAddon',
 #     'weblate.addons.flags.SourceEditAddon',
 #     'weblate.addons.flags.TargetEditAddon',
+#     'weblate.addons.json.JSONCustomizeAddon',
 #     'weblate.addons.generate.GenerateFileAddon',
+#     'weblate.addons.properties.PropertiesSortAddon',
 # )
 
 
@@ -787,6 +785,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'weblate.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_THROTTLE_CLASSES': (
@@ -809,6 +808,7 @@ if 'WEBLATE_LOCK_DOWN' in os.environ:
     LOGIN_REQUIRED_URLS = (
         r'/(.*)$',
     )
+
     LOGIN_REQUIRED_URLS_EXCEPTIONS = (
         r'/accounts/(.*)$', # Required for login
         r'/static/(.*)$',   # Required for development mode
@@ -816,17 +816,10 @@ if 'WEBLATE_LOCK_DOWN' in os.environ:
         r'/data/(.*)$',     # Allowing public access to data exports
         r'/hooks/(.*)$',    # Allowing public access to notification hooks
         r'/api/(.*)$',      # Allowing access to API
+        r'/js/i18n/$',      # Javascript localization
+        r'/contact/$',      # Optional for contact form
+        r'/legal/(.*)$',    # Optional for legal app
     )
-
-# In such case you will want to include some of the exceptions
-# LOGIN_REQUIRED_URLS_EXCEPTIONS = (
-#    r'/accounts/(.*)$', # Required for login
-#    r'/static/(.*)$',   # Required for development mode
-#    r'/widgets/(.*)$',  # Allowing public access to widgets
-#    r'/data/(.*)$',     # Allowing public access to data exports
-#    r'/hooks/(.*)$',    # Allowing public access to notification hooks
-#    r'/api/(.*)$',      # Allowing access to API
-# )
 
 # Force sane test runner
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
